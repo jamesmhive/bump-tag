@@ -16,7 +16,7 @@ try {
 }
 
 async function run() {
-    const packageJson = getPackageJson();
+    const packageJson = await getPackageJson();
     console.log('package.json version ', packageJson.version);
 }
 
