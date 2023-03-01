@@ -2,14 +2,13 @@ name: Release
 on:
     workflow_dispatch:
         inputs:
-            flutter_version:
-                description: 'Framework version'
+            workspace:
+                description: 'Workspace'
                 required: true
-                default: '2.5.3'
-            publish_artifacts:
-                description: 'Publish artifacts'
+            release:
+                description: 'Release'
                 required: true
-                default: 'true'
+                default: 'patch'
 jobs:
     build:
         runs-on: ubuntu-latest
