@@ -32,7 +32,8 @@ jobs:
             - run: npm ci
             -   uses: ./.github/actions/release
                 with:
-                    who-to-greet: ${{ github.event.inputs.workspace }}
+                    github-workspace: ${{ github.workspace }}
+                    workspace: ${{ github.event.inputs.workspace }}
                     release: ${{ github.event.inputs.release }}
             - run: npm run lint
             - run: npm run build
