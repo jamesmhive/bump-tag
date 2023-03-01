@@ -6,6 +6,7 @@
   "author": "",
   "license": "ISC",
   "homepage": "https://github.com/jamesmhive/bump-tag#readme",
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jamesmhive/bump-tag.git"
