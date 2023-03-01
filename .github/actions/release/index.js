@@ -9,8 +9,6 @@ const $workspace = core.getInput('workspace');
 const $release = core.getInput('release');
 const $workspaceDir = path.resolve(process.env.GITHUB_WORKSPACE, $workspacesDir, $workspace);
 
-printArgs();
-
 try {
     await run();
 } catch (error) {
@@ -22,19 +20,12 @@ async function run() {
     console.log('package.json version ', packageJson.version);
 }
 
-function printArgs() {
-    console.log(JSON.stringify({
-        $workspacesDir,
-        $workspace,
-        $release,
-        $workspaceDir,
-    }, null, 2))
-}
 async function getPackageJson() {
     const packageJsonPath = path.join($workspaceDir, 'package.json');
     if (!existsSync(packageJsonPath)) {
         throw new Error('package.json could not be found in workspace.');
     }
+    console.log(`reading package from ${packageJsonPath}`);
     const content = await readFile(packageJsonPath, 'utf-8');
     return JSON.parse(content);
 }

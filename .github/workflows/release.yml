@@ -33,7 +33,6 @@ jobs:
             -   uses: ./.github/actions/release
                 with:
                     workspaces-dir: packages
-                    github-workspace: ${{ github.workspace }}
                     workspace: ${{ github.event.inputs.workspace }}
                     release: ${{ github.event.inputs.release }}
             - run: npm run lint
