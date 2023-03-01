@@ -10,6 +10,10 @@
     "type": "git",
     "url": "git+https://github.com/jamesmhive/bump-tag.git"
   },
+  "dependencies": {
+    "@actions/core": "^1.10.0",
+    "@actions/github": "^5.1.1"
+  },
   "scripts": {
     "build": "echo \"build\"",
     "lint": "echo \"lint\"",
