@@ -1,10 +1,11 @@
 name: 'Release Action'
 description: 'Bump package.json'
 inputs:
-    github-workspace:
-        description: 'github-workspace'
+    workspaces-dir:
+        description: 'Name of the directory containing npm workspaces'
+        required: true
     workspace:
-        description: 'Workspace name'
+        description: 'npm workspace name'
         required: true
     release:
         description: 'Release type path|minor|major'
