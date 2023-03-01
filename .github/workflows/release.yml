@@ -1,0 +1,28 @@
+name: Release
+on:
+    workflow_dispatch:
+        inputs:
+            flutter_version:
+                description: 'Framework version'
+                required: true
+                default: '2.5.3'
+            publish_artifacts:
+                description: 'Publish artifacts'
+                required: true
+                default: 'true'
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                node: [ 18.14.0 ]
+        name: Node ${{ matrix.node }} build
+        steps:
+            - uses: actions/checkout@v3
+            - name: Setup node
+              uses: actions/setup-node@v3
+              with:
+                  node-version: ${{ matrix.node }}
+            - run: npm ci
+            - run: npm run lint
+            - run: npm run build

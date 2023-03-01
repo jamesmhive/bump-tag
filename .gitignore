@@ -1,0 +1,38 @@
+# Project
+notes.md
+node_modules
+tmp
+dist
+lib
+dist-ssr
+.cache
+*.local
+.tsbuildinfo
+.turbo
+.env
+vite.config.js.timestamp*
+
+# Storybook
+workshop/package-lock.json
+workshop/storybook-static
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.code-workspace
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
