@@ -39,7 +39,6 @@ jobs:
             - run: npm ci
             - run: npm run lint
             - run: npm run build
-            - name: Bump and Tag
             -   uses: ./.github/actions/bump-tag
                 with:
                     workspaces-dir: packages
