@@ -10,7 +10,10 @@ const $workspacesDir = core.getInput('workspaces-dir');
 const $workspace = core.getInput('workspace');
 const $release = core.getInput('release');
 const $cwd = process.env.GITHUB_WORKSPACE;
+const $targetBranch = process.env['INPUT_TARGET-BRANCH'];
 const $workspaceDir = path.resolve($cwd, $workspacesDir, $workspace);
+
+console.log($targetBranch);
 
 try {
     await start();
@@ -21,22 +24,26 @@ try {
 async function start() {
     verifyReleaseType();
 
+    const context = github.context.payload;
     const packageJson = await getPackageJson();
     const currentVersion = packageJson.version;
+
+    const currentBranch = context.ref;
+    const userName = context.sender?.login || 'Automated Version Bump';
 
     await run('git', [
         'config',
         'user.name',
-        `"${process.env.GITHUB_USER || 'Automated Version Bump'}"`
+        `"${userName}"`
     ]);
 
     await run('git', [
         'config',
         'user.email',
-        `"${process.env.GITHUB_EMAIL || 'auto-release@users.noreply.github.com'}"`,
+        `'auto-release@users.noreply.github.com'`,
     ]);
 
-    // do it in the current checked out github branch (DETACHED HEAD)
+    // bump and commit in the current checked out GitHub branch (DETACHED HEAD)
     // important for further usage of the package.json version
     await run('npm', [
         'version',
@@ -53,13 +60,31 @@ async function start() {
     console.log(`Current version = ${currentVersion}`);
     console.log(`Next version = ${nextVersion}`);
 
-    const commitMessage = `bump v${nextVersion}`;
+    const commitMessage = `bump ${packageJson.name} v${nextVersion}`;
     await run('git', [
         'commit',
         '-a',
         '-m',
         commitMessage
     ]);
+
+    // now go to the actual branch to perform the same versioning
+    await run('git', [
+        'checkout',
+        currentBranch
+    ]);
+
+    await run('npm', [
+        'version',
+        '--allow-same-version=true',
+        '--git-tag-version=false',
+        currentVersion
+    ]);
+
+    runSync(`npm version --git-tag-version=false ${$release}`);
+
+    const remoteRepo = `https://${process.env.GITHUB_ACTOR}:${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git`;
+    console.log('remoteRepo=', remoteRepo);
 }
 
 async function getPackageJson() {
