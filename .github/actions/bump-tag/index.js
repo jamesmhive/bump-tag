@@ -44,7 +44,7 @@ async function start() {
     await run('git', [
         'config',
         'user.email',
-        `'auto.release@users.noreply.github.com'`,
+        `'auto.bump@users.noreply.github.com'`,
     ]);
 
     // bump and commit in the current checked out GitHub branch (DETACHED HEAD)
@@ -95,7 +95,7 @@ async function start() {
     await run('git', ['push', repository, '--follow-tags']);
     await run('git', ['push', repository, '--tags']);
 
-    console.log('here');
+    console.log('Done');
 }
 
 async function getPackageJson() {
@@ -146,13 +146,5 @@ function runSync(command) {
 }
 
 function logError(error) {
-    console.error(`✖ ERROR\n ${error.stack || error}`);
+    console.error(`✖ ERROR \n${error.stack || error}`);
 }
-
-// console.log(`release = ${release}`);
-// console.log(`GITHUB_WORKSPACE = ${process.env.GITHUB_WORKSPACE}`);
-// const time = (new Date()).toTimeString();
-// core.setOutput("time", time);
-// // Get the JSON webhook payload for the event that triggered the workflow
-// const payload = JSON.stringify(github.context.payload, undefined, 2)
-// console.log(`The event payload: ${payload}`);

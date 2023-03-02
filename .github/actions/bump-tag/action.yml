@@ -1,5 +1,5 @@
-name: 'Release Action'
-description: 'Bump package.json'
+name: 'Bump and Tag'
+description: 'Bump package.json version and tag repository'
 inputs:
     workspaces-dir:
         description: 'Name of the directory containing npm workspaces'
