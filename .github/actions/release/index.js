@@ -89,6 +89,7 @@ async function start() {
 
     const repository = `https://${process.env.GITHUB_ACTOR}:${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git`;
     await run('git', ['fetch']);
+    await run('git', ['checkout', currentBranch]);
     await run('git', ['tag', tagName]);
     await run('git', ['push', repository, '--follow-tags']);
     await run('git', ['push', repository, '--tags']);
