@@ -56,7 +56,8 @@ async function start() {
         currentVersion
     ]);
 
-    const nextVersion = runSync(`npm version --git-tag-version=false ${$release}`)
+    const cd = `cd ${$workspaceDir}`;
+    const nextVersion = runSync(`${cd} && npm version --git-tag-version=false ${$release}`)
         .toString().trim().replace(/^v/, '');
 
     console.log(`Next version = ${nextVersion}`);
@@ -82,7 +83,7 @@ async function start() {
         currentVersion
     ]);
 
-    runSync(`npm version --git-tag-version=false ${$release}`);
+    runSync(`${cd} && npm version --git-tag-version=false ${$release}`);
 
     const tagName = `${$workspace}-v${nextVersion}`;
     console.log(`Creating tag "${tagName}"`);
