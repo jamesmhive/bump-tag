@@ -26,7 +26,7 @@ async function start() {
     const packageJson = await getPackageJson();
     const currentVersion = packageJson.version;
 
-    const currentBranch = context.ref.replace('/refs/heads/', '');
+    const currentBranch = context.ref.replace('refs/heads/', '');
     const userName = context.sender?.login || 'Automated Version Bump';
 
     console.log(`Creating "${$release}" release...`);
