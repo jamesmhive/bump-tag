@@ -45,11 +45,21 @@ async function start() {
         currentVersion
     ]);
 
-    console.log(`Current version ${currentVersion}`);
+    const nextVersion = runSync(`npm version --git-tag-version=false ${$release}`)
+        .toString().trim().replace(/^v/, '');
 
-    const nextVersion = execSync(`npm version --git-tag-version=false ${$release}`).toString().trim().replace(/^v/, '');
-    console.log('Next version:', nextVersion);
+    console.log(`Creating ${$release} release...`);
+    console.log(`Package name = ${packageJson.name}`);
+    console.log(`Current version = ${currentVersion}`);
+    console.log(`Next version = ${nextVersion}`);
 
+    const commitMessage = `bump v${nextVersion}`;
+    await run('git', [
+        'commit',
+        '-a',
+        '-m',
+        commitMessage
+    ]);
 }
 
 async function getPackageJson() {
@@ -93,6 +103,12 @@ function run(command, args) {
         });
     });
 }
+
+function runSync(command) {
+    console.log('spawn | command:', command);
+    return execSync(command)
+}
+
 // console.log(`release = ${release}`);
 // console.log(`GITHUB_WORKSPACE = ${process.env.GITHUB_WORKSPACE}`);
 // const time = (new Date()).toTimeString();
