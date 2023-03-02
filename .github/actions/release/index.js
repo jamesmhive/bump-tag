@@ -10,10 +10,7 @@ const $workspacesDir = core.getInput('workspaces-dir');
 const $workspace = core.getInput('workspace');
 const $release = core.getInput('release');
 const $cwd = process.env.GITHUB_WORKSPACE;
-const $targetBranch = process.env['INPUT_TARGET-BRANCH'];
 const $workspaceDir = path.resolve($cwd, $workspacesDir, $workspace);
-
-console.log($targetBranch);
 
 try {
     await start();
@@ -30,6 +27,12 @@ async function start() {
 
     const currentBranch = context.ref;
     const userName = context.sender?.login || 'Automated Version Bump';
+
+    console.log(`Creating "${$release}" release...`);
+    console.log(`Package name = ${packageJson.name}`);
+    console.log(`Current version = ${currentVersion}`);
+    console.log(`Branch = ${currentBranch}`);
+    console.log(`Username = ${userName}`);
 
     await run('git', [
         'config',
@@ -55,9 +58,6 @@ async function start() {
     const nextVersion = runSync(`npm version --git-tag-version=false ${$release}`)
         .toString().trim().replace(/^v/, '');
 
-    console.log(`Creating ${$release} release...`);
-    console.log(`Package name = ${packageJson.name}`);
-    console.log(`Current version = ${currentVersion}`);
     console.log(`Next version = ${nextVersion}`);
 
     const commitMessage = `bump ${packageJson.name} v${nextVersion}`;
@@ -83,7 +83,7 @@ async function start() {
 
     runSync(`npm version --git-tag-version=false ${$release}`);
 
-    const tagName = `${$workspace}/${nextVersion}`;
+    const tagName = `${$workspace}-v${nextVersion}`;
     const repository = `https://${process.env.GITHUB_ACTOR}:${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git`;
     await run('git', ['tag', tagName]);
     await run('git', ['push', repository, '--follow-tags']);
