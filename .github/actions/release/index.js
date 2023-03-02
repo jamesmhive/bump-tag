@@ -15,6 +15,7 @@ const $workspaceDir = path.resolve($cwd, $workspacesDir, $workspace);
 try {
     await start();
 } catch (error) {
+    logError(error);
     core.setFailed(error.message);
 }
 
@@ -88,6 +89,8 @@ async function start() {
     await run('git', ['tag', tagName]);
     await run('git', ['push', repository, '--follow-tags']);
     await run('git', ['push', repository, '--tags']);
+
+    console.log('here');
 }
 
 async function getPackageJson() {
@@ -135,6 +138,10 @@ function run(command, args) {
 function runSync(command) {
     // console.log('spawn | command:', command);
     return execSync(command)
+}
+
+function logError(error) {
+    console.error(`✖  fatal     ${error.stack || error}`);
 }
 
 // console.log(`release = ${release}`);
