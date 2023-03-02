@@ -44,7 +44,7 @@ async function start() {
     await run('git', [
         'config',
         'user.email',
-        `'auto-release@users.noreply.github.com'`,
+        `'auto.release@users.noreply.github.com'`,
     ]);
 
     // bump and commit in the current checked out GitHub branch (DETACHED HEAD)
