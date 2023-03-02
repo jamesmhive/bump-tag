@@ -9,6 +9,7 @@ on:
                     - portal
                     - baybridge
                     - dashboards
+                    - .
             release:
                 description: 'Release'
                 type: choice
@@ -41,7 +42,7 @@ jobs:
             - run: npm run build
             -   uses: ./.github/actions/bump-tag
                 with:
-                    workspaces-dir: packages
+                    workspaces-dir: .
                     workspace: ${{ github.event.inputs.workspace }}
                     release: ${{ github.event.inputs.release }}
 

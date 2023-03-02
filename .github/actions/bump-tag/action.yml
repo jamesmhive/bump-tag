@@ -4,9 +4,11 @@ inputs:
     workspaces-dir:
         description: 'Name of the directory containing npm workspaces'
         required: true
+        default: '.'
     workspace:
         description: 'npm workspace name'
         required: true
+        default: '.'
     release:
         description: 'Release type path|minor|major'
         required: true
