@@ -85,7 +85,10 @@ async function start() {
     runSync(`npm version --git-tag-version=false ${$release}`);
 
     const tagName = `${$workspace}-v${nextVersion}`;
+    console.log(`Creating tag "${tagName}"`);
+
     const repository = `https://${process.env.GITHUB_ACTOR}:${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git`;
+    await run('git', ['fetch']);
     await run('git', ['tag', tagName]);
     await run('git', ['push', repository, '--follow-tags']);
     await run('git', ['push', repository, '--tags']);
@@ -141,7 +144,7 @@ function runSync(command) {
 }
 
 function logError(error) {
-    console.error(`✖  fatal     ${error.stack || error}`);
+    console.error(`✖ ERROR\n ${error.stack || error}`);
 }
 
 // console.log(`release = ${release}`);
