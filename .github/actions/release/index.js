@@ -109,7 +109,7 @@ function verifyReleaseType() {
 
 function run(command, args) {
     return new Promise((resolve, reject) => {
-        console.log('spawn | command:', command, 'args:', args);
+        // console.log('spawn | command:', command, 'args:', args);
         const child = spawn(command, args, {cwd: $cwd});
         let isDone = false;
         const errorMessages = [];
@@ -133,7 +133,7 @@ function run(command, args) {
 }
 
 function runSync(command) {
-    console.log('spawn | command:', command);
+    // console.log('spawn | command:', command);
     return execSync(command)
 }
 
