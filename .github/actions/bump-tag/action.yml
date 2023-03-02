@@ -1,14 +1,10 @@
 name: 'Bump and Tag'
 description: 'Bump package.json version and tag repository'
 inputs:
-    workspaces-dir:
-        description: 'Name of the directory containing npm workspaces'
-        required: true
-        default: '.'
     workspace:
         description: 'npm workspace name'
         required: true
-        default: '.'
+        default: '<root>'
     release:
         description: 'Release type path|minor|major'
         required: true

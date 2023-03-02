@@ -6,11 +6,12 @@ import {execSync, spawn} from 'child_process';
 import {existsSync} from 'fs';
 import {readFile} from 'fs/promises';
 
-const $workspacesDir = core.getInput('workspaces-dir');
+const ROOT_WORKSPACE = '<root>';
+
 const $workspace = core.getInput('workspace');
 const $release = core.getInput('release');
 const $cwd = process.env.GITHUB_WORKSPACE;
-const $workspaceDir = path.resolve($cwd, $workspacesDir, $workspace);
+
 
 try {
     await start();
@@ -22,15 +23,19 @@ try {
 async function start() {
     verifyReleaseType();
 
-    const context = github.context.payload;
-    const packageJson = await getPackageJson();
-    const currentVersion = packageJson.version;
+    const packageJsonDirectory = resolvePackageJsonDirectory();
+    const packageJson = await getPackageJson(packageJsonDirectory);
 
+    const currentVersion = packageJson.version;
+    const packageNameNoScope = getPackageNameNoScope(packageJson);
+
+    const context = github.context.payload;
     const currentBranch = context.ref.replace('refs/heads/', '');
     const userName = context.sender?.login || 'Automated Version Bump';
 
     console.log(`Creating "${$release}" release...`);
     console.log(`Package name = ${packageJson.name}`);
+    console.log(`Package name no scope = ${packageNameNoScope}`);
     console.log(`Current version = ${currentVersion}`);
     console.log(`Branch = ${currentBranch}`);
     console.log(`Username = ${userName}`);
@@ -44,11 +49,11 @@ async function start() {
     await run('git', [
         'config',
         'user.email',
-        `'auto.bump@users.noreply.github.com'`,
+        `'auto.version@users.noreply.github.com'`,
     ]);
 
     // bump and commit in the current checked out GitHub branch (DETACHED HEAD)
-    // important for further usage of the package.json version
+    // important for further usage of the package.json version in other jobs
     await run('npm', [
         'version',
         '--allow-same-version=true',
@@ -56,13 +61,13 @@ async function start() {
         currentVersion
     ]);
 
-    const cd = `cd ${$workspaceDir}`;
+    const cd = `cd ${packageJsonDirectory}`;
     const nextVersion = runSync(`${cd} && npm version --git-tag-version=false ${$release}`)
         .toString().trim().replace(/^v/, '');
 
     console.log(`Next version = ${nextVersion}`);
 
-    const commitMessage = `bump ${packageJson.name}-v${nextVersion}`;
+    const commitMessage = `bump ${packageNameNoScope}-v${nextVersion}`;
     await run('git', [
         'commit',
         '-a',
@@ -85,7 +90,7 @@ async function start() {
 
     runSync(`${cd} && npm version --git-tag-version=false ${$release}`);
 
-    const tagName = `${$workspace}-v${nextVersion}`;
+    const tagName = `${packageNameNoScope}/v${nextVersion}`;
     console.log(`Creating tag "${tagName}"`);
 
     const repository = `https://${process.env.GITHUB_ACTOR}:${process.env.GITHUB_TOKEN}@github.com/${process.env.GITHUB_REPOSITORY}.git`;
@@ -98,14 +103,38 @@ async function start() {
     console.log('Done');
 }
 
-async function getPackageJson() {
-    const packageJsonPath = path.join($workspaceDir, 'package.json');
+function resolvePackageJsonDirectory() {
+    return $workspace === ROOT_WORKSPACE ? $cwd : path.resolve($cwd, $workspace);
+}
+
+async function getPackageJson(packageJsonDirectory) {
+    const packageJsonPath = path.join(packageJsonDirectory, 'package.json');
     console.log(`Reading package from ${packageJsonPath}`);
     if (!existsSync(packageJsonPath)) {
         throw new Error('package.json could not be found');
     }
     const content = await readFile(packageJsonPath, 'utf-8');
-    return JSON.parse(content);
+    const packageJson = JSON.parse(content);
+    verifyPackageJson(packageJson);
+    return packageJson;
+}
+
+function verifyPackageJson(packageJson) {
+    if (!packageJson) {
+        throw new Error('package.json is undefined');
+    }
+    if (!packageJson.version) {
+        throw new Error('package.json is missing a "version" attribute');
+    }
+    if (typeof packageJson.version !== 'string') {
+        throw new Error('package.json "version" must be a string');
+    }
+    if (!packageJson.name) {
+        throw new Error('package.json is missing a "name" attribute');
+    }
+    if (typeof packageJson.name !== 'string') {
+        throw new Error('package.json "name" attribute must be a string');
+    }
 }
 
 function verifyReleaseType() {
@@ -113,6 +142,12 @@ function verifyReleaseType() {
     if (!allowedTypes.includes($release)) {
         throw new Error(`Invalid release type "${$release}". Release must match ${allowedTypes.join('|')}`)
     }
+}
+
+function getPackageNameNoScope(packageJson) {
+    const packageName = packageJson.name;
+    const n = packageName.indexOf('/');
+    return n === -1 ? packageName : packageName.substring(n + 1);
 }
 
 function run(command, args) {

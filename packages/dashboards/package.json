@@ -1,5 +1,5 @@
 {
-  "name": "dashboards",
+  "name": "@scope/dashboards",
   "version": "2.0.0",
   "type": "module"
 }
