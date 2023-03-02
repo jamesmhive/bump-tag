@@ -100,10 +100,10 @@ async function start() {
 
 async function getPackageJson() {
     const packageJsonPath = path.join($workspaceDir, 'package.json');
+    console.log(`Reading package from ${packageJsonPath}`);
     if (!existsSync(packageJsonPath)) {
         throw new Error('package.json could not be found in workspace.');
     }
-    console.log(`Reading package from ${packageJsonPath}`);
     const content = await readFile(packageJsonPath, 'utf-8');
     return JSON.parse(content);
 }
