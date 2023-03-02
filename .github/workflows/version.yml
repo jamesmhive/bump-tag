@@ -36,13 +36,13 @@ jobs:
               uses: actions/setup-node@v3
               with:
                   node-version: ${{ matrix.node }}
-            - run: npm ci
-            - run: npm run lint
-            - run: npm run build
             - name: Bump and Tag
             - uses: ./.github/actions/bump-tag
               with:
                     workspaces-dir: packages
                     workspace: ${{ github.event.inputs.workspace }}
                     release: ${{ github.event.inputs.release }}
+            - run: npm ci
+            - run: npm run lint
+            - run: npm run build
 
