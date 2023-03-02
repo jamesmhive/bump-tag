@@ -102,7 +102,7 @@ async function getPackageJson() {
     const packageJsonPath = path.join($workspaceDir, 'package.json');
     console.log(`Reading package from ${packageJsonPath}`);
     if (!existsSync(packageJsonPath)) {
-        throw new Error('package.json could not be found in workspace.');
+        throw new Error('package.json could not be found');
     }
     const content = await readFile(packageJsonPath, 'utf-8');
     return JSON.parse(content);
@@ -111,7 +111,7 @@ async function getPackageJson() {
 function verifyReleaseType() {
     const allowedTypes = ['major', 'minor', 'patch'];
     if (!allowedTypes.includes($release)) {
-        throw new Error(`Invalid release type "${$release}"`)
+        throw new Error(`Invalid release type "${$release}". Release must match ${allowedTypes.join('|')}`)
     }
 }
 
