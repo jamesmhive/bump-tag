@@ -62,7 +62,7 @@ async function start() {
 
     console.log(`Next version = ${nextVersion}`);
 
-    const commitMessage = `bump ${packageJson.name} v${nextVersion}`;
+    const commitMessage = `bump ${packageJson.name}-v${nextVersion}`;
     await run('git', [
         'commit',
         '-a',
