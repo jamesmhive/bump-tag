@@ -44,7 +44,7 @@ function getWorkingDirectory() {
 async function promptUser(packages, options) {
     const packageChoices = packages.map((pkg) => ({
         title: pkg.nameNoScope,
-        description: pkg.name,
+        description: pkg.description ?? pkg.name,
         value: pkg.name
     }));
     return await prompts([
@@ -158,28 +158,38 @@ async function ensureCleanBranch(branch, remote) {
 async function getWorkspacePackages() {
     const packages = [];
 
-    const root = await readPackageJson(__workdir);
+    const rootPackageJsonPath = path.join(__workdir, 'package.json');
+    const root = await readPackageJson(rootPackageJsonPath);
 
     packages.push(createPackageEntry({
         root: true,
         packageJson: root,
-        file: path.join(__workdir, 'package.json'),
+        directory: __workdir,
+        file: rootPackageJsonPath,
     }));
 
     if (!Array.isArray(root.workspaces)) {
         return packages;
     }
 
-    const packageJsons = await glob('**/package.json', {
-        ignore: 'node_modules/**'
-    });
+    const packageJsonPaths = await Promise.all(root.workspaces.map(async(workspace) => {
+        const workspacePath = path.join(__workdir, workspace, 'package.json');
+        return await glob(workspacePath, {
+            ignore: 'node_modules/**'
+        });
+    }));
 
+    const p = await Promise.all(packageJsonPaths.flat().map(async (packageJsonPath) => {
+        const packageJson = await readPackageJson(packageJsonPath);
+        const directory = path.dirname(packageJsonPath);
+        return createPackageEntry({
+            file: packageJsonPath,
+            packageJson,
+            directory,
+        })
+    }));
 
-    packageJsons.map((file) => {
-       console.log(file);
-    });
-
-
+    console.log(p);
 
     return packages;
 }
@@ -187,14 +197,17 @@ async function getWorkspacePackages() {
 function createPackageEntry({
     packageJson,
     file,
+    directory,
     root = false
 }) {
     return {
         root,
         name: packageJson.name,
         version: packageJson.version,
+        description: packageJson.description,
         nameNoScope: getPackageNameNoScope(packageJson.name),
         packageJson,
+        directory,
         file,
     };
 }
@@ -203,8 +216,7 @@ function getPackageNameNoScope(packageName) {
     return n === -1 ? packageName : packageName.substring(n + 1);
 }
 
-async function readPackageJson(directoryPath) {
-    const packageJSONPath = path.join(directoryPath, 'package.json');
+async function readPackageJson(packageJSONPath) {
     if (!existsSync(packageJSONPath)) {
         exitWithError(`package.json does not exist in directory: ${packageJSONPath}`);
         return null;

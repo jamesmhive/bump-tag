@@ -1,5 +1,6 @@
 {
   "name": "@scope/baybridge",
+  "description": "bay bridge app",
   "version": "1.0.1",
   "type": "module"
 }
