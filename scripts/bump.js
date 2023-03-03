@@ -3,6 +3,7 @@ import prompts from 'prompts';
 import {readFile} from 'fs/promises';
 import {existsSync} from 'fs';
 import {execa} from 'execa';
+import glob from 'glob';
 
 let __workdir = getWorkingDirectory();
 
@@ -14,14 +15,19 @@ try {
 
 async function main() {
     const packages = await getWorkspacePackages();
-    const response = await promptUser(packages);
+    const response = await promptUser(packages, {
+        onCancel: () => {
+            console.log('process cancelled by user.')
+            process.exit(1);
+        }
+    });
 
     const packageInfo = packages.find((pkg) => pkg.name === response.packageName);
 
-    await bump({
-        ...response,
-        packageInfo,
-    });
+    // await bump({
+    //     ...response,
+    //     packageInfo,
+    // });
 
     console.log('Done');
 }
@@ -35,7 +41,7 @@ function getWorkingDirectory() {
     return process.cwd();
 }
 
-async function promptUser(packages) {
+async function promptUser(packages, options) {
     const packageChoices = packages.map((pkg) => ({
         title: pkg.nameNoScope,
         description: pkg.name,
@@ -70,7 +76,9 @@ async function promptUser(packages) {
                 {title: 'major', description: 'Contains breaking changes', value: 'major'},
             ]
         },
-    ]);
+    ], {
+        ...options
+    });
 }
 
 async function bump({
@@ -88,8 +96,8 @@ async function bump({
     await run('git', ['fetch']);
     await run('git', ['pull']);
 
-    console.log(`Running 'npm version' with "${releaseType}"`);
-    const {stdio: nextVersion} = await run('npm', [
+    console.log(`Running 'npm version' with "${releaseType}" on ${packageInfo.name}`);
+    const {stdout: nextVersion} = await run('npm', [
         'version',
         '--git-tag-version=false',
         releaseType
@@ -97,18 +105,16 @@ async function bump({
 
     console.log(`Next version: ${nextVersion}`);
 
-    const releaseBranchName = `${packageInfo.nameNoScope}-${nextVersion}`;
+    const releaseBranchName = `bump-${packageInfo.nameNoScope}-${nextVersion}`;
     const commitMessage = `bump ${releaseBranchName}`;
 
     console.log(`Creating release branch: ${releaseBranchName}`);
     await run('git', ['branch', releaseBranchName]);
+    await run('git', ['checkout', releaseBranchName]);
     await run('git', ['add', '--all']);
     await run('git', ['commit', '-m', commitMessage]);
-    await run('git', ['push']);
+    await run('git', ['push', remote, releaseBranchName]);
     await run('git', ['checkout', branch]);
-
-//stdio: 'inherit'
-
 
 }
 
@@ -154,22 +160,44 @@ async function getWorkspacePackages() {
 
     const root = await readPackageJson(__workdir);
 
-    packages.push({
+    packages.push(createPackageEntry({
         root: true,
-        name: root.name,
-        version: root.version,
-        nameNoScope: getPackageNameNoScope(root.name),
+        packageJson: root,
         file: path.join(__workdir, 'package.json'),
-        packageJson: root
-    });
+    }));
 
     if (!Array.isArray(root.workspaces)) {
         return packages;
     }
 
+    const packageJsons = await glob('**/package.json', {
+        ignore: 'node_modules/**'
+    });
+
+
+    packageJsons.map((file) => {
+       console.log(file);
+    });
+
+
+
     return packages;
 }
 
+function createPackageEntry({
+    packageJson,
+    file,
+    root = false
+}) {
+    return {
+        root,
+        name: packageJson.name,
+        version: packageJson.version,
+        nameNoScope: getPackageNameNoScope(packageJson.name),
+        packageJson,
+        file,
+    };
+}
 function getPackageNameNoScope(packageName) {
     const n = packageName.indexOf('/');
     return n === -1 ? packageName : packageName.substring(n + 1);
