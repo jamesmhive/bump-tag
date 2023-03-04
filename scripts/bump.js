@@ -94,7 +94,9 @@ async function bump({
     console.log(`Getting latest from "${mainBranch}"...`);
     await run('git', ['fetch']);
     await run('git', ['checkout', mainBranch]);
-    await run('git', ['pull', remote, mainBranch]);
+    await run('git', ['pull', remote, mainBranch], {
+        stdio: 'inherit'
+    });
 
     console.log(`Running 'npm version' with "${releaseType}" on ${packageInfo.name}`);
     await run('npm', [
