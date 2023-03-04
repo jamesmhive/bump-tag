@@ -91,11 +91,6 @@ async function bump({
     releaseType,
     packageInfo,
 }) {
-    const isClean = ensureCleanBranch(mainBranch, remote);
-    if (!isClean) {
-        return exitWithError('Directory contains uncommitted changes.');
-    }
-
     console.log(`Getting latest from "${mainBranch}"...`);
     await run('git', ['fetch']);
     await run('git', ['checkout', mainBranch]);
@@ -214,26 +209,6 @@ async function getHashFor(branch) {
 async function hasUncommittedChanges() {
     const stdout = run('git', ['status', '-s']);
     return stdout.length > 0;
-}
-
-async function ensureCleanBranch(branch, remote) {
-    try {
-        const headHash = await getHashFor('HEAD');
-        const branchHash = await getHashFor(branch);
-        const remoteBranch = await getHashFor(`${remote}/${branch}`);
-        if (headHash !== branchHash) {
-            logError(`You need to be on the "${branch}" branch to run this script`);
-            return false;
-        }
-        if (branchHash !== remoteBranch) {
-            logError(`You need to push your changes first`);
-            return false;
-        }
-        return true;
-    } catch(error) {
-        logError(error);
-        return false;
-    }
 }
 
 async function getWorkspacePackages() {
