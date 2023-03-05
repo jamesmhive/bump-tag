@@ -1,8 +1,8 @@
 name: Tag
 on:
-    push:
-        branches:
-            - main
+    pull_request:
+        types:
+            - closed
 
 permissions:
     contents: write
@@ -13,6 +13,6 @@ jobs:
     tag:
         runs-on: ubuntu-latest
         steps:
-            - run: echo a bump PR was merged to main
+            - run: echo pull request was closed
             - run: echo ${{ toJson(github.event.pull_request) }}
             - run: echo ${{ toJson(github.event.label) }}
