@@ -28,6 +28,8 @@ async function main() {
 
     const packageInfo = packages.find((pkg) => pkg.name === response.packageName);
 
+    console.log('\nStarting bump');
+
     await bump({
         ...response,
         packageInfo,
@@ -112,9 +114,7 @@ async function bump({
     console.log(`Bump version: ${packageInfo.version} -> ${nextVersion}`);
 
     const bumpBranchName = `bump/${packageInfo.nameNoScope}-v${nextVersion}`;
-    const commitMessage = `bump! ${packageInfo.nameNoScope}-v${nextVersion}`;
-
-    console.log(`Creating bump branch "${bumpBranchName}"`);
+    console.log(`Getting ready to create bump branch "${bumpBranchName}"`);
 
     console.log(`Checking if the branch already exists`);
     if (await doesBranchExist(`${remote}/${bumpBranchName}`)) {
@@ -131,22 +131,35 @@ async function bump({
         await tryReset();
         return exitWithError(
             `Branch "${bumpBranchName}" already exists in local repository.
-            * Did you already bump "${packageInfo.nameNoScope}" to v${nextVersion}?
+            * Did you already attempt to bump "${packageInfo.nameNoScope}" to v${nextVersion}?
             * Delete the local branch and try again`
         );
     }
 
-    console.log('Creating local bump branch and committing changes');
+    console.log('Checking if a tag matching this version already exists on remote');
+    const tag = `${packageInfo.nameNoScope}/v${nextVersion}`;
+    if (await doesRemoteTagExist(remote, tag)) {
+        console.log('A tag matching this version exists on remote!');
+        await tryReset();
+        return exitWithError(
+            `Tag "${tag}" already exists on remote.
+            * It looks like someone already bumped and tagged "${packageInfo.nameNoScope}" to v${nextVersion}?
+            * package.json version may be out of sync with remote tags`
+        );
+    }
+
+    console.log('Creating local branch and committing changes');
+    const commitMessage = `bump! ${packageInfo.nameNoScope}-v${nextVersion}`;
     await run('git', ['checkout', '-b', bumpBranchName]);
     await run('git', ['add', '--all']);
     await run('git', ['commit', '-m', commitMessage]);
 
-    console.log(`Pushing local bump branch to ${remote}`);
+    console.log(`Pushing "${bumpBranchName}" to ${remote}`);
     await run('git', ['push', '-u', remote, bumpBranchName]);
     await run('git', ['pull']);
-    await run('git', ['checkout', mainBranch]);
 
-    console.log('Removing up bump branch from local.');
+    console.log('Cleaning up');
+    await run('git', ['checkout', mainBranch]);
     await run('git', ['branch', '-d', bumpBranchName]);
 
     console.log('Creating pull request label');
@@ -157,7 +170,7 @@ async function bump({
         'create',
         pullRequestLabel,
         '--description',
-        'Pull request bumps the package.json version',
+        'bumps package.json version',
         '--color',
         '6EE7B7',
         '--force',
@@ -180,6 +193,7 @@ async function bump({
             nextVersion,
         }),
     ], {
+        // pipe output to stdout
         stdio: 'inherit'
     });
 
@@ -202,8 +216,8 @@ function renderPullRequestBody({
 }
 
 async function doesBranchExist(branch) {
-    const remoteBranch = await getHashFor(branch);
-    return !!remoteBranch.hash;
+    const result = await getHashFor(branch);
+    return !!result.hash;
 }
 
 async function getHashFor(branch) {
@@ -221,13 +235,22 @@ async function getHashFor(branch) {
     }
 }
 
+async function doesRemoteTagExist(remote, tag) {
+    try {
+        const {stdout} = await run('git', ['ls-remote', remote, `refs/tags/${tag}`]);
+        return stdout.length > 0;
+    } catch {
+        return false;
+    }
+}
+
 async function ensurePrerequisites() {
     if (!(await isGitHubCliInstalled())) {
         exitWithError('GitHub CLI is not installed.\nRun "brew install gh"\nOr download from https://cli.github.com/');
         return;
     }
     if (await hasUncommittedChanges()) {
-        exitWithError('You have uncommitted changes. Commit your changes before running bump.');
+        exitWithError('You have uncommitted changes in your local repository. Commit or stash your changes before running bump.');
         return;
     }
 }
@@ -394,7 +417,7 @@ function getWakeUpMessage() {
         `pledges its allegiance to the bump`,
         `has entered the chat`,
         `ate a bologna sandwich. Maximum HP went up by +8`,
-        `is initializing the bump co-routine particle accelerator`,
+        `is initializing bump particle accelerator`,
         `shot a beam that causes night-time stuffiness`,
         `emits a pale green light`,
         `is awaiting your command`,
