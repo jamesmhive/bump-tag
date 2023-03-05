@@ -14,5 +14,4 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - run: echo a bump PR was merged to main
-            - run: echo merged = ${{ github.event.pull_request.merged }}
-            - run: echo label = ${{ github.event.label.name }}
+            - run: echo ${{ toJson(github.event) }}
