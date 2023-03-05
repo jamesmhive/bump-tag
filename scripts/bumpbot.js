@@ -400,7 +400,7 @@ function getWakeUpMessage() {
         `materializes from thin air`,
         `casts Brain Shock and inflicts 720 points of damage`,
         `drinks a potion and restores 400 HP`,
-        `woke up and created a cure for the common cold.`,
+        `woke up and created a cure for the common cold`,
         `rises from the grave`,
         `is pondering its existence`,
         `powered up and gained sentience`,
@@ -418,13 +418,14 @@ function getWakeUpMessage() {
         `pledges its allegiance to the bump`,
         `has entered the chat`,
         `ate a bologna sandwich. Maximum HP went up by +8`,
-        `is initializing bump particle accelerator`,
+        `is initializing the bump particle accelerator`,
         `shot a beam that causes night-time stuffiness`,
         `emits a pale green light`,
         `is awaiting your command`,
         `is filled with determination`,
         `tried to run away but failed`,
         `is ready to bump`,
+        `accidentally created a time paradox. Execute a bump to correct the time stream`
     ];
     return messages[Math.floor(Math.random() * messages.length)];
 }
