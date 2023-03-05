@@ -1,15 +1,16 @@
 name: Tag
 on:
     pull_request:
-        types:
-            - closed
+        branches:
+            - main
+        types: [closed]
 
 permissions:
     contents: write
 
 jobs:
-    if_merged_bump:
-        if: ${{ github.event.pull_request.merged == true && github.event.label.name == 'bump' }}
+    tag:
+        if: ${{ github.event.pull_request.merged && github.event.label.name == 'bump' }}
         runs-on: ubuntu-latest
         steps:
-            - run: echo a bump PR was merged
+            - run: echo a bump PR was merged to main. tagging
