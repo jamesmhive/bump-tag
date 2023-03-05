@@ -30,7 +30,7 @@ async function main() {
 
     console.log('\nStarting bump');
 
-    await bump({
+    await bumpbot({
         ...response,
         packageInfo,
     });
@@ -88,7 +88,7 @@ async function promptUser(packages, options) {
     });
 }
 
-async function bump({
+async function bumpbot({
     mainBranch,
     remote,
     releaseType,
