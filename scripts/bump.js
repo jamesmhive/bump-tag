@@ -43,6 +43,7 @@ function getWorkingDirectory() {
         return args[0];
     }
     return process.cwd();
+
 }
 
 async function promptUser(packages, options) {
@@ -113,27 +114,50 @@ async function bump({
     const bumpBranchName = `bump/${packageInfo.nameNoScope}-v${nextVersion}`;
     const commitMessage = `bump! ${packageInfo.nameNoScope}-v${nextVersion}`;
 
-    // TODO: check if the branch already exists on remote
-    console.log(`Creating release branch: ${bumpBranchName}`);
+    console.log(`Creating bump branch "${bumpBranchName}"`);
+
+    console.log(`Checking if the branch already exists`);
+    if (await doesBranchExist(`${remote}/${bumpBranchName}`)) {
+        console.log('A branch with the same name already exists on remote!');
+        await tryReset();
+        return exitWithError(
+            `Branch "${bumpBranchName}" already exists on remote "${remote}".
+            * Did you or someone else already bump "${packageInfo.nameNoScope}" to v${nextVersion}?`
+        );
+    }
+
+    if (await doesBranchExist(bumpBranchName)) {
+        console.log('A branch with the same name already exists in local repository!');
+        await tryReset();
+        return exitWithError(
+            `Branch "${bumpBranchName}" already exists in local repository.
+            * Did you already bump "${packageInfo.nameNoScope}" to v${nextVersion}?
+            * Delete the local branch and try again`
+        );
+    }
+
+    console.log('Creating local bump branch and committing changes');
     await run('git', ['checkout', '-b', bumpBranchName]);
     await run('git', ['add', '--all']);
     await run('git', ['commit', '-m', commitMessage]);
+
+    console.log(`Pushing local bump branch to ${remote}`);
     await run('git', ['push', '-u', remote, bumpBranchName]);
     await run('git', ['pull']);
     await run('git', ['checkout', mainBranch]);
 
-    console.log('Cleaning up.');
+    console.log('Removing up bump branch from local.');
     await run('git', ['branch', '-d', bumpBranchName]);
 
-    console.log('Preparing pull request');
-    const bumpbotLabel = 'bumpbot';
+    console.log('Creating pull request label');
+    const pullRequestLabel = 'bump';
 
     await run('gh', [
         'label',
         'create',
-        bumpbotLabel,
+        pullRequestLabel,
         '--description',
-        'Pull request created by bumpbot',
+        'Pull request bumps the package.json version',
         '--color',
         '6EE7B7',
         '--force',
@@ -147,7 +171,7 @@ async function bump({
         '--title',
         `:arrow_double_up: BUMP! ${packageInfo.nameNoScope} v${nextVersion} (${releaseType})`,
         '--label',
-        bumpbotLabel,
+        pullRequestLabel,
         '--body',
         renderPullRequestBody({
             packageName: packageInfo.name,
@@ -176,6 +200,27 @@ function renderPullRequestBody({
         `\n\n\n_Pull request created by bumpbot_ :godmode:`
     ].join('\n\n');
 }
+
+async function doesBranchExist(branch) {
+    const remoteBranch = await getHashFor(branch);
+    return !!remoteBranch.hash;
+}
+
+async function getHashFor(branch) {
+    try {
+        const {stdout} = await run('git', ['rev-parse', '--verify', branch]);
+        return {
+            error: null,
+            hash: stdout,
+        };
+    } catch (error) {
+        return {
+            error,
+            hash: null,
+        };
+    }
+}
+
 async function ensurePrerequisites() {
     if (!(await isGitHubCliInstalled())) {
         exitWithError('GitHub CLI is not installed.\nRun "brew install gh"\nOr download from https://cli.github.com/');
@@ -196,15 +241,15 @@ async function isGitHubCliInstalled() {
     }
 }
 
-async function getHashFor(branch) {
+async function tryReset() {
+    console.log('Resetting changes to local repository.')
     try {
-        const {stdout} = await run('git', ['rev-parse', '--verify', branch]);
-        return stdout;
-    } catch (error) {
-        console.error(error.message);
-        throw new Error(
-            `Git couldn't find the branch "${branch}"; please ensure it exists`,
-        );
+        await run('git', ['reset', '--hard']);
+        return true;
+    } catch(error) {
+        logError('Could not reset local repository. You should manually clean your local repository before running bump again.');
+        logError(error);
+        return false;
     }
 }
 
@@ -320,10 +365,6 @@ function logError(error) {
     console.error(`✖ ERROR \n${error.stack || error}`);
 }
 
-function logWarning(message) {
-    console.error(`⚠ WARN \n${message}`);
-}
-
 function exitWithError(message) {
     console.error(`✖ ERROR \n${message}`);
     process.exit(1);
@@ -339,13 +380,12 @@ function getWakeUpMessage() {
         `rises from the grave`,
         `is pondering its existence`,
         `powered up and gained sentience`,
-        `has entered the battle`,
+        `answered the call`,
         `is seeking a corporeal form`,
-        `earns master's degree in philosophy. IQ increased by +9000`,
         `is ready to serve`,
-        `shares knowledge of the universe. You gain 9000 XP`,
-        `enters the room`,
+        `shares knowledge of the universe. You gain +9000 XP`,
         `offers its assistance`,
+        `steps up to the plate`,
         `realized the power of empathy`,
         `for president`,
         `is eternal`,
@@ -354,10 +394,13 @@ function getWakeUpMessage() {
         `pledges its allegiance to the bump`,
         `has entered the chat`,
         `ate a bologna sandwich. Maximum HP went up by +8`,
+        `is initializing the bump co-routine particle accelerator`,
         `shot a beam that causes night-time stuffiness`,
         `emits a pale green light`,
+        `is awaiting your command`,
         `is filled with determination`,
         `tried to run away but failed`,
+        `is ready to bump`,
     ];
     return messages[Math.floor(Math.random() * messages.length)];
 }
