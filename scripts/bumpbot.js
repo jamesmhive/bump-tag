@@ -389,7 +389,7 @@ function logError(error) {
 }
 
 function exitWithError(message) {
-    console.error(`✖ ERROR \n${message}`);
+    console.error(`\n✖ ERROR \n${message}\n`);
     process.exit(1);
 }
 
