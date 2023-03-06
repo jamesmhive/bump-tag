@@ -6,9 +6,7 @@ import {readFile} from 'fs/promises';
 
 
 const GITHUB_WORKSPACE = process.env.GITHUB_WORKSPACE;
-const INPUT_HEADREF = process.env.INPUT_HEADREF;
-const INPUT_REFNAME = process.env.INPUT_REFNAME;
-const INPUT_EDITED = process.env.INPUT_EDITED;
+const INPUT_SHA = process.env.INPUT_SHA;
 
 try {
     await start();
@@ -20,16 +18,10 @@ try {
 async function start() {
     console.log('start');
     console.log('GITHUB_WORKSPACE ', GITHUB_WORKSPACE);
-    console.log('INPUT_HEADREF ', INPUT_HEADREF);
-    console.log('INPUT_REFNAME ', INPUT_REFNAME);
-    //console.log('INPUT_EDITED ', INPUT_EDITED);
-    //console.log('GITHUB_REF', process.env.GITHUB_REF);
-    //console.log('GITHUB_REF_NAME', process.env.GITHUB_REF_NAME);
-    //console.log('GITHUB_HEAD_REF', process.env.GITHUB_REF);
-    //console.log('GITHUB_BASE_REF', process.env.GITHUB_BASE_REF);
-    console.log('SHA', process.env.INPUT_SHA);
-    console.log('GITHUB_SHA', process.env.GITHUB_SHA);
-    //console.log(JSON.stringify(Object.keys(process.env), null, 2));
+    console.log('INPUT_SHA ', INPUT_SHA);
+
+    const foo = runSync(`git log -m -1 --name-only --pretty="format:" ${INPUT_SHA}`);
+    console.log(foo);
 }
 
 async function getPackageJson(packageJsonDirectory) {

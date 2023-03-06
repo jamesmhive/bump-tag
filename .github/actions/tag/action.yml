@@ -1,12 +1,8 @@
 name: 'Tag'
-description: 'Create a tag from the version from the package.json that was modified'
+description: 'Create a tag using the package.json that was modified'
 inputs:
-    headref:
-        description: 'headref'
-    refname:
-        description: 'refname'
     sha:
-        description: 'sha'
+        description: 'Commit SHA to tag'
 runs:
     using: 'node16'
     main: 'index.js'
