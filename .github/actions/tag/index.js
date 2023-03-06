@@ -19,30 +19,15 @@ async function start() {
     console.log('GITHUB_WORKSPACE ', GITHUB_WORKSPACE);
     console.log('INPUT_SHA ', INPUT_SHA);
 
-    const {stdout} = await run('git', [
-        'log',
-        '-m',
-        '-1',
+    const {stdout} = await run('git diff ', [
+        'diff',
         '--name-only',
-        '--pretty="format:"',
-        INPUT_SHA
+        `${INPUT_SHA}..${INPUT_SHA}~`
     ], {
         shell: true,
     });
 
     console.log(stdout);
-
-    console.log('----');
-
-    const foo = await run('git', [
-        'diff-tree',
-        '--no-commit-id',
-        '--name-only',
-        INPUT_SHA,
-        '-r',
-    ]);
-
-    console.log(foo.stdout);
 }
 
 async function getPackageJson(packageJsonDirectory) {
