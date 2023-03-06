@@ -22,7 +22,12 @@ async function start() {
     console.log('GITHUB_WORKSPACE ', GITHUB_WORKSPACE);
     console.log('INPUT_HEADREF ', INPUT_HEADREF);
     console.log('INPUT_REFNAME ', INPUT_REFNAME);
-    console.log('INPUT_REFNAME ', INPUT_EDITED);
+    console.log('INPUT_EDITED ', INPUT_EDITED);
+    console.log('GITHUB_REF', process.env.GITHUB_REF);
+    console.log('GITHUB_REF_NAME', process.env.GITHUB_REF_NAME);
+    console.log('GITHUB_HEAD_REF', process.env.GITHUB_REF);
+    console.log('GITHUB_BASE_REF', process.env.GITHUB_BASE_REF);
+    console.log('GITHUB_SHA', process.env.GITHUB_SHA);
     console.log(JSON.stringify(Object.keys(process.env), null, 2));
 }
 
