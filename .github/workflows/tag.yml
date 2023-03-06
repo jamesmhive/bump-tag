@@ -19,4 +19,4 @@ jobs:
               with:
                   headref: ${{ github.head_ref }}
                   refname: ${{ github.ref_name }}
-                  edited: ${{ github.event.edited }}
+                  sha: ${{ github.sha }}

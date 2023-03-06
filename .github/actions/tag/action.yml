@@ -5,8 +5,8 @@ inputs:
         description: 'headref'
     refname:
         description: 'refname'
-    edited:
-        description: 'edited'
+    sha:
+        description: 'sha'
 runs:
     using: 'node16'
     main: 'index.js'
