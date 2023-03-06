@@ -51,6 +51,10 @@ function run(command, args) {
     return new Promise((resolve, reject) => {
         const child = spawn(command, args, {cwd: GITHUB_WORKSPACE});
         let isDone = false;
+        const stdout = [];
+        const stderr = [];
+        child.stdout.on('data', (chunk) => stdout.push(chunk.toString()));
+        child.stderr.on('data', (chunk) => stderr.push(chunk.toString()));
         child.on('error', (error) => {
             if (!isDone) {
                 isDone = true;
@@ -62,11 +66,12 @@ function run(command, args) {
                 if (code === 0) {
                     resolve({
                         exitCode: code,
-                        stderr: child.stderr,
-                        stdout: child.stdout,
+                        stderr: stderr.join('\n'),
+                        stdout: stdout.join('\n'),
                     });
                 } else {
-                    console.error(child.stderr);
+                    console.error(stdout.join('\n'));
+                    console.error(stderr.join('\n'));
                     reject(new Error(`${command} exited with code ${code}`));
                 }
             }
