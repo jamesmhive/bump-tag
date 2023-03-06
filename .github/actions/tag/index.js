@@ -17,6 +17,16 @@ try {
 }
 
 async function main() {
+    // important:
+    //
+    // the GitHub workflow must checkout with a fetch depth so a diff can be performed
+    //
+    // uses: actions/checkout@v3
+    //      with:
+    //          fetch-depth: 2
+    //
+    // might be able to get around this by checking out the commit in this action
+
     console.log(`Running git diff for SHA ${INPUT_SHA}`)
     const gitdiff = await run('git ', [
         'diff',
