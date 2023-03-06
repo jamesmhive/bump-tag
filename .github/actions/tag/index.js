@@ -27,21 +27,33 @@ async function start() {
         shell: true,
     });
 
-    console.log(gitdiff.stdout);
+    const filesChanged = gitdiff.stdout.split('\n');
+    const packagesChanged = filesChanged.filter((change) => change.endsWith('package.json'));
+
+    if (packagesChanged.length === 0) {
+        throw new Error(`Commit ${INPUT_SHA} does not contain any changes to package.json`);
+    }
+
+    if (packagesChanged.length > 1) {
+        throw new Error(`Commit ${INPUT_SHA} contains more than 1 package.json change`);
+    }
+
+    const changedPackage = packagesChanged[0].toString();
+    console.log(`package.json changed = ${changedPackage}`);
+    console.log(`full path = ${path.join(GITHUB_WORKSPACE, changedPackage)}`);
+
+    const pkg = readJsonFile(path.join(GITHUB_WORKSPACE, changedPackage));
+    console.log(`Package name = ${pkg.name}`);
+    console.log(`Package version = ${pkg.version}`);
+    console.log(`Package name no scope = ${getPackageNameNoScope(pkg.name)}`);
 }
 
-async function getPackageJson(packageJsonDirectory) {
-    const packageJsonPath = path.join(GITHUB_WORKSPACE, 'package.json');
-    console.log(`Reading package from ${packageJsonPath}`);
-    if (!existsSync(packageJsonPath)) {
-        throw new Error('package.json could not be found');
-    }
-    const content = await readFile(packageJsonPath, 'utf-8');
+async function readJsonFile(filePath) {
+    const content = await readFile(filePath, 'utf-8');
     return JSON.parse(content);
 }
 
-function getPackageNameNoScope(packageJson) {
-    const packageName = packageJson.name;
+function getPackageNameNoScope(packageName) {
     const n = packageName.indexOf('/');
     return n === -1 ? packageName : packageName.substring(n + 1);
 }
