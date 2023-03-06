@@ -1,6 +1,5 @@
 import path from 'path';
-import {EOL} from 'os';
-import {execSync, spawn} from 'child_process';
+import {spawn} from 'child_process';
 import {existsSync} from 'fs';
 import {readFile} from 'fs/promises';
 
@@ -20,8 +19,8 @@ async function start() {
     console.log('GITHUB_WORKSPACE ', GITHUB_WORKSPACE);
     console.log('INPUT_SHA ', INPUT_SHA);
 
-    const foo = runSync(`git log -m -1 --name-only --pretty="format:" ${INPUT_SHA}`);
-    console.log(foo);
+    const {stdout} = run(`git log -m -1 --name-only --pretty="format:" ${INPUT_SHA}`);
+    console.log(stdout);
 }
 
 async function getPackageJson(packageJsonDirectory) {
@@ -42,13 +41,13 @@ function getPackageNameNoScope(packageJson) {
 
 function run(command, args) {
     return new Promise((resolve, reject) => {
-        // console.log('spawn | command:', command, 'args:', args);
-        const child = spawn(command, args, {cwd: $cwd});
+        const child = spawn(command, args, {cwd: GITHUB_WORKSPACE});
         let isDone = false;
         const errorMessages = [];
         child.on('error', (error) => {
             if (!isDone) {
                 isDone = true;
+                logError(error);
                 reject(error);
             }
         });
@@ -56,18 +55,17 @@ function run(command, args) {
         child.on('exit', (code) => {
             if (!isDone) {
                 if (code === 0) {
-                    resolve();
+                    resolve({
+                        exitCode: code,
+                        stderr: child.stderr,
+                        stdout: child.stdout,
+                    });
                 } else {
-                    reject(`${errorMessages.join('')}${EOL}${command} exited with code ${code}`);
+                    reject(new Error(`${command} command exited with code ${code}`));
                 }
             }
         });
     });
-}
-
-function runSync(command) {
-    // console.log('spawn | command:', command);
-    return execSync(command)
 }
 
 function logError(error) {
