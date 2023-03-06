@@ -57,9 +57,6 @@ function run(command, args) {
                 reject(error);
             }
         });
-        child.stderr.on('data', (chunk) => {
-            console.error(chunk);
-        });
         child.on('exit', (code) => {
             if (!isDone) {
                 if (code === 0) {
@@ -69,6 +66,7 @@ function run(command, args) {
                         stdout: child.stdout,
                     });
                 } else {
+                    console.error(child.stderr);
                     reject(new Error(`${command} exited with code ${code}`));
                 }
             }
