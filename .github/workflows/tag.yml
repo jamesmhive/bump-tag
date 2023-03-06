@@ -14,5 +14,5 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - run: echo pull request was closed
-            - run: echo ${{ toJson(github.event.label) }}
+            - run: echo ${{ toJson(github.event.pull_request.labels) }}
             - run: echo ${{ toJson(github.event.pull_request.merged) }}

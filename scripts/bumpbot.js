@@ -59,7 +59,7 @@ async function promptUser(packages, options) {
             type: 'text',
             name: 'mainBranch',
             message: `Main branch`,
-            initial: `master`,
+            initial: `main`,
         },
         {
             type: 'text',
