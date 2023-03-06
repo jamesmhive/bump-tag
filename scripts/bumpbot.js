@@ -114,9 +114,8 @@ async function bump({
     console.log(`Bump version: ${packageInfo.version} -> ${nextVersion}`);
 
     const bumpBranchName = `bump/${packageInfo.nameNoScope}-v${nextVersion}`;
-    console.log(`Getting ready to create bump branch "${bumpBranchName}"`);
+    console.log(`Creating local branch "${bumpBranchName}"`);
 
-    console.log(`Checking if the branch already exists`);
     if (await doesBranchExist(`${remote}/${bumpBranchName}`)) {
         console.log('A branch with the same name already exists on remote!');
         await tryReset();
@@ -137,7 +136,6 @@ async function bump({
         );
     }
 
-    console.log('Checking if a tag matching this version already exists on remote');
     const tag = `${packageInfo.nameNoScope}/v${nextVersion}`;
     if (await doesRemoteTagExist(remote, tag)) {
         console.log('A tag matching this version exists on remote!');
@@ -149,7 +147,6 @@ async function bump({
         );
     }
 
-    console.log('Creating local branch and committing changes');
     const commitMessage = `bump! ${packageInfo.nameNoScope}-v${nextVersion}`;
     await run('git', ['checkout', '-b', bumpBranchName]);
     await run('git', ['add', '--all']);
