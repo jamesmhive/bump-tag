@@ -182,7 +182,7 @@ async function bump({
         '--head',
         bumpBranchName,
         '--title',
-        `:arrow_double_up: BUMP! ${packageInfo.nameNoScope} v${nextVersion} (${releaseType})`,
+        `BUMP! ${packageInfo.nameNoScope} v${nextVersion} (${releaseType})`,
         '--label',
         pullRequestLabel,
         '--body',
@@ -207,7 +207,7 @@ function renderPullRequestBody({
 }) {
     const code = (text) => `\`${text}\``
     return [
-        `### ${packageName}`,
+        `### :arrow_double_up: ${packageName}`,
         `**Release type:** ${code(releaseType)}`,
         `**Next version:** ${code(nextVersion)}`,
         `**Previous version:** ${code(previousVersion)}`,

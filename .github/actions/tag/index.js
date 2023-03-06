@@ -19,7 +19,9 @@ async function start() {
     console.log('GITHUB_WORKSPACE ', GITHUB_WORKSPACE);
     console.log('INPUT_SHA ', INPUT_SHA);
 
-    const {stdout} = await run('git ', [
+    await run('git', ['fetch']);
+
+    const {stdout: diff} = await run('git ', [
         'diff',
         '--name-only',
         `${INPUT_SHA}..${INPUT_SHA}~`
@@ -27,7 +29,7 @@ async function start() {
         shell: true,
     });
 
-    console.log(stdout);
+    console.log(diff);
 }
 
 async function getPackageJson(packageJsonDirectory) {
@@ -49,31 +51,28 @@ function getPackageNameNoScope(packageJson) {
 function run(command, args, options) {
     return new Promise((resolve, reject) => {
         const child = spawn(command, args, {cwd: GITHUB_WORKSPACE, ...options});
-        let isDone = false;
+        let childDidError = false;
         const stdout = [];
         const stderr = [];
         child.stdout.on('data', (chunk) => stdout.push(chunk.toString()));
         child.stderr.on('data', (chunk) => stderr.push(chunk.toString()));
+        const stdoutAsString = () => stdout.join('\n').trim();
+        const stderrAsString = () => stderr.join('\n').trim();
         child.on('error', (error) => {
-            if (!isDone) {
-                isDone = true;
-                console.error(stdout.join('\n'));
-                console.error(stderr.join('\n'));
+            if (!childDidError) {
+                childDidError = true;
+                console.log(stdoutAsString());
+                console.error(stderrAsString());
                 reject(error);
             }
         });
-        child.on('exit', (code) => {
-            if (!isDone) {
-                if (code === 0) {
-                    resolve({
-                        exitCode: code,
-                        stderr: stderr.join('\n'),
-                        stdout: stdout.join('\n'),
-                    });
+        child.on('exit', (exitCode) => {
+            if (!childDidError) {
+                if (exitCode === 0) {
+                    resolve({stdout: stdoutAsString()});
                 } else {
-                    console.error(stdout.join('\n'));
-                    console.error(stderr.join('\n'));
-                    reject(new Error(`${command} exited with code ${code}`));
+                    console.log(stdoutAsString());
+                    reject(new Error(`${command} exited with code ${exitCode}: \n ${stderrAsString()}`));
                 }
             }
         });
