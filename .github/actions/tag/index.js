@@ -19,7 +19,7 @@ async function start() {
     console.log('GITHUB_WORKSPACE ', GITHUB_WORKSPACE);
     console.log('INPUT_SHA ', INPUT_SHA);
 
-    const {stdout} = await run('git diff ', [
+    const {stdout} = await run('git ', [
         'diff',
         '--name-only',
         `${INPUT_SHA}..${INPUT_SHA}~`
