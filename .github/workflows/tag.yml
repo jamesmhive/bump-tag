@@ -12,9 +12,7 @@ permissions:
 
 jobs:
     tag:
-        if: ${{ github.event.pull_request.merged && (contains(github.event.pull_request.labels.*.name, 'bump')) }}
+        if: ${{ github.event.pull_request.merged && contains(github.event.pull_request.labels.*.name, 'bump') }}
         runs-on: ubuntu-latest
         steps:
             - run: echo pull request was closed
-            - run: echo ${{ toJson() }}
-            - run: echo ${{ toJson(github.event.pull_request.merged) }}
