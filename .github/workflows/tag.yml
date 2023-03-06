@@ -16,3 +16,7 @@ jobs:
         steps:
             - uses: actions/checkout@v3
             - uses: ./.github/actions/tag
+              with:
+                  headref: ${{ github.head_ref }}
+                  refname: ${{ github.ref_name }}
+                  edited: ${{ github.event.edited }}

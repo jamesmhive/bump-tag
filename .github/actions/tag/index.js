@@ -6,17 +6,34 @@ import {readFile} from 'fs/promises';
 
 
 const GITHUB_WORKSPACE = process.env.GITHUB_WORKSPACE;
-
+const INPUT_HEADREF = process.env.INPUT_HEADREF;
+const INPUT_REFNAME = process.env.INPUT_REFNAME;
+const INPUT_EDITED = process.env.INPUT_EDITED;
 
 try {
     await start();
 } catch (error) {
     logError(error);
+    process.exitCode = 1;
 }
 
 async function start() {
     console.log('start');
     console.log('GITHUB_WORKSPACE ', GITHUB_WORKSPACE);
+    console.log('INPUT_HEADREF ', INPUT_HEADREF);
+    console.log('INPUT_REFNAME ', INPUT_REFNAME);
+    console.log('INPUT_REFNAME ', INPUT_EDITED);
+    console.log(JSON.stringify(Object.keys(process.env), null, 2));
+}
+
+async function getPackageJson(packageJsonDirectory) {
+    const packageJsonPath = path.join(GITHUB_WORKSPACE, 'package.json');
+    console.log(`Reading package from ${packageJsonPath}`);
+    if (!existsSync(packageJsonPath)) {
+        throw new Error('package.json could not be found');
+    }
+    const content = await readFile(packageJsonPath, 'utf-8');
+    return JSON.parse(content);
 }
 
 function getPackageNameNoScope(packageJson) {
