@@ -177,6 +177,8 @@ async function bump({
     await run('gh', [
         'pr',
         'create',
+        '--base',
+        mainBranch,
         '--head',
         bumpBranchName,
         '--title',
