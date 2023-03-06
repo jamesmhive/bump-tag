@@ -31,6 +31,18 @@ async function start() {
     });
 
     console.log(stdout);
+
+    console.log('----');
+
+    const foo = await run('git', [
+        'diff-tree',
+        '--no-commit-id',
+        '--name-only',
+        INPUT_SHA,
+        '-r',
+    ]);
+
+    console.log(foo.stdout);
 }
 
 async function getPackageJson(packageJsonDirectory) {
