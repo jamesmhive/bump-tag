@@ -1,20 +1,22 @@
 import path from 'path';
 import {spawn} from 'child_process';
-import {existsSync} from 'fs';
 import {readFile} from 'fs/promises';
 
 
 const GITHUB_WORKSPACE = process.env.GITHUB_WORKSPACE;
+const GITHUB_ACTOR = process.env.GITHUB_ACTOR;
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+const GITHUB_REPOSITORY = process.env.GITHUB_REPOSITORY;
 const INPUT_SHA = process.env.INPUT_SHA;
 
 try {
-    await start();
+    await main();
 } catch (error) {
     logError(error);
     process.exitCode = 1;
 }
 
-async function start() {
+async function main() {
     console.log('start');
     console.log('GITHUB_WORKSPACE ', GITHUB_WORKSPACE);
     console.log('INPUT_SHA ', INPUT_SHA);
@@ -38,14 +40,31 @@ async function start() {
         throw new Error(`Commit ${INPUT_SHA} contains more than 1 package.json change`);
     }
 
-    const changedPackage = packagesChanged[0].toString();
+    const changedPackage = path.join(GITHUB_WORKSPACE, packagesChanged[0].toString())
     console.log(`package.json changed = ${changedPackage}`);
-    console.log(`full path = ${path.join(GITHUB_WORKSPACE, changedPackage)}`);
 
     const pkg = await readJsonFile(path.join(GITHUB_WORKSPACE, changedPackage));
     console.log(`Package name = ${pkg.name}`);
     console.log(`Package version = ${pkg.version}`);
-    console.log(`Package name no scope = ${getPackageNameNoScope(pkg.name)}`);
+
+    const tagName = `${getPackageNameNoScope(pkg.name)}/v${pkg.version}`;
+    console.log(`Creating tag "${tagName}"`);
+
+    await run('git', [
+        'config',
+        'user.name',
+        `"bumpbot"`
+    ]);
+
+    await run('git', [
+        'config',
+        'user.email',
+        `'bumpbot@users.noreply.github.com'`,
+    ]);
+
+    const repository = `https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git`;
+    await run('git', ['tag', tagName]);
+    await run('git', ['push', repository, '--tags']);
 }
 
 async function readJsonFile(filePath) {
