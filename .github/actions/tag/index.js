@@ -24,7 +24,7 @@ async function start() {
         '-m',
         '-1',
         '--name-only',
-        '--pretty="format:"',
+        '--pretty\="format:"',
         INPUT_SHA
     ]);
 
