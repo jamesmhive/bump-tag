@@ -47,9 +47,9 @@ function getPackageNameNoScope(packageJson) {
     return n === -1 ? packageName : packageName.substring(n + 1);
 }
 
-function run(command, args) {
+function run(command, args, options) {
     return new Promise((resolve, reject) => {
-        const child = spawn(command, args, {cwd: GITHUB_WORKSPACE});
+        const child = spawn(command, args, {cwd: GITHUB_WORKSPACE, ...options});
         let isDone = false;
         const stdout = [];
         const stderr = [];
@@ -58,6 +58,8 @@ function run(command, args) {
         child.on('error', (error) => {
             if (!isDone) {
                 isDone = true;
+                console.error(stdout.join('\n'));
+                console.error(stderr.join('\n'));
                 reject(error);
             }
         });
