@@ -94,7 +94,7 @@ async function bump({
     releaseType,
     packageInfo,
 }) {
-    console.log(`Getting latest from "${mainBranch}"...`);
+    console.log(`Getting latest from "${remote}/${mainBranch}"...`);
     await run('git', ['fetch']);
     await run('git', ['checkout', mainBranch]);
     await run('git', ['pull', remote, mainBranch], {
