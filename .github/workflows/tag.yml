@@ -4,6 +4,7 @@ on:
         types: [closed]
         branches:
             - main
+            - development
 
 permissions:
     contents: write
