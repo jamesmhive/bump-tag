@@ -42,7 +42,7 @@ async function start() {
     console.log(`package.json changed = ${changedPackage}`);
     console.log(`full path = ${path.join(GITHUB_WORKSPACE, changedPackage)}`);
 
-    const pkg = readJsonFile(path.join(GITHUB_WORKSPACE, changedPackage));
+    const pkg = await readJsonFile(path.join(GITHUB_WORKSPACE, changedPackage));
     console.log(`Package name = ${pkg.name}`);
     console.log(`Package version = ${pkg.version}`);
     console.log(`Package name no scope = ${getPackageNameNoScope(pkg.name)}`);
