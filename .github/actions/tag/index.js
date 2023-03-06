@@ -17,10 +17,7 @@ try {
 }
 
 async function main() {
-    console.log('start');
-    console.log('GITHUB_WORKSPACE ', GITHUB_WORKSPACE);
-    console.log('INPUT_SHA ', INPUT_SHA);
-
+    console.log(`Running git diff for SHA ${INPUT_SHA}`)
     const gitdiff = await run('git ', [
         'diff',
         '--name-only',
@@ -41,11 +38,12 @@ async function main() {
     }
 
     const changedPackage = path.join(GITHUB_WORKSPACE, packagesChanged[0].toString())
-    console.log(`package.json changed = ${changedPackage}`);
+    console.log(`package.json changed in this commit: ${changedPackage}`);
 
-    const pkg = await readJsonFile(path.join(GITHUB_WORKSPACE, changedPackage));
-    console.log(`Package name = ${pkg.name}`);
-    console.log(`Package version = ${pkg.version}`);
+    console.log('Reading package.json');
+    const pkg = await readJsonFile(changedPackage);
+    console.log(`package.name: ${pkg.name}`);
+    console.log(`package.version: ${pkg.version}`);
 
     const tagName = `${getPackageNameNoScope(pkg.name)}/v${pkg.version}`;
     console.log(`Creating tag "${tagName}"`);
@@ -63,7 +61,16 @@ async function main() {
     ]);
 
     const repository = `https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git`;
-    await run('git', ['tag', tagName]);
+    await run('git', [
+        'tag',
+        '-a',
+        tagName,
+        INPUT_SHA,
+        '-m',
+        `${pkg.name} v${pkg.version}`
+    ]);
+
+    console.log('Pushing tag to repository');
     await run('git', ['push', repository, '--tags']);
 }
 
