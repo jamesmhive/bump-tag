@@ -1,6 +1,7 @@
 import {spawn} from 'child_process';
 
 const GITHUB_WORKSPACE = process.cwd();
+const INPUT_SHA = '64c0a6ac230f172236bd0d1ac25261e66a868d04';
 
 try {
     void await main();
@@ -11,14 +12,24 @@ try {
 
 async function main() {
 
-    const {stdout: stdout1} = await run('git', ['--version']);
-    console.log(`> ${stdout1}`);
+    const {stdout: versionout} = await run('git', ['--version']);
+    console.log(`> ${versionout}`);
 
+    const {stdout: fetchout} = await run('git', ['fetch']);
+    console.log(`> ${fetchout}`);
 
-    const {stdout: stdout2} = await run('git', ['--ver']);
-    console.log(`> ${stdout2}`);
+    const {stdout: pullout} = await run('git', ['pull']);
+    console.log(`> ${pullout}`);
 
+    const {stdout: diff} = await run('git ', [
+        'diff',
+        '--name-only',
+        `${INPUT_SHA}..${INPUT_SHA}~`
+    ], {
+        shell: true,
+    });
 
+    console.log(`> ${diff}`);
 }
 
 function run(command, args, options) {
@@ -27,10 +38,10 @@ function run(command, args, options) {
         let childDidError = false;
         const stdout = [];
         const stderr = [];
-        child.stdout.on('data', (chunk) => stdout.push(chunk.toString()));
-        child.stderr.on('data', (chunk) => stderr.push(chunk.toString()));
         const stdoutAsString = () => stdout.join('\n').trim();
         const stderrAsString = () => stderr.join('\n').trim();
+        child.stdout.on('data', (chunk) => stdout.push(chunk.toString()));
+        child.stderr.on('data', (chunk) => stderr.push(chunk.toString()));
         child.on('error', (error) => {
             if (!childDidError) {
                 childDidError = true;
@@ -40,7 +51,6 @@ function run(command, args, options) {
             }
         });
         child.on('exit', (exitCode) => {
-            console.log(child);
             if (!childDidError) {
                 if (exitCode === 0) {
                     resolve({stdout: stdoutAsString()});

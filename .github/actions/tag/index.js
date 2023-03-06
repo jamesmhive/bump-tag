@@ -19,9 +19,10 @@ async function start() {
     console.log('GITHUB_WORKSPACE ', GITHUB_WORKSPACE);
     console.log('INPUT_SHA ', INPUT_SHA);
 
-    await run('git', ['fetch']);
+    const gitfetch = await run('git', ['fetch']);
+    console.log(`fetch > ${gitfetch.stdout}`);
 
-    const {stdout: diff} = await run('git ', [
+    const gitdiff = await run('git ', [
         'diff',
         '--name-only',
         `${INPUT_SHA}..${INPUT_SHA}~`
@@ -29,7 +30,7 @@ async function start() {
         shell: true,
     });
 
-    console.log(diff);
+    console.log(gitdiff.stdout);
 }
 
 async function getPackageJson(packageJsonDirectory) {
