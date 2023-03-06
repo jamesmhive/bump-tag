@@ -19,7 +19,15 @@ async function start() {
     console.log('GITHUB_WORKSPACE ', GITHUB_WORKSPACE);
     console.log('INPUT_SHA ', INPUT_SHA);
 
-    const {stdout} = run(`git log -m -1 --name-only --pretty="format:" ${INPUT_SHA}`);
+    const {stdout} = await run('git', [
+        'log',
+        '-m',
+        '-1',
+        '--name-only',
+        '--pretty="format:"',
+        INPUT_SHA
+    ]);
+
     console.log(stdout);
 }
 
@@ -47,7 +55,6 @@ function run(command, args) {
         child.on('error', (error) => {
             if (!isDone) {
                 isDone = true;
-                logError(error);
                 reject(error);
             }
         });
