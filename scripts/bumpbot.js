@@ -78,7 +78,7 @@ async function promptUser(packages, options) {
             name: 'releaseType',
             message: 'Choose a release type',
             choices: [
-                {title: 'patch', description: 'Bug fixes', value: 'patch'},
+                {title: 'patch', description: 'Backwards compatible bug fixes', value: 'patch'},
                 {title: 'minor', description: 'Backwards compatible features', value: 'minor'},
                 {title: 'major', description: 'Contains breaking changes', value: 'major'},
             ]
