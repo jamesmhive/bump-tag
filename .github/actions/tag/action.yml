@@ -1,0 +1,5 @@
+name: 'Tag'
+description: 'Create a tag from package.json version'
+runs:
+    using: 'node16'
+    main: 'index.js'

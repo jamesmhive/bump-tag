@@ -1,18 +1,17 @@
 name: Tag
 on:
     pull_request:
-        types: [closed]
+        types: [ closed ]
         branches:
             - main
+            - development
 
 permissions:
     contents: write
-
-#if: ${{ github.event.pull_request.merged && github.event.label.name == 'bump' }}
 
 jobs:
     tag:
         if: ${{ github.event.pull_request.merged && contains(github.event.pull_request.labels.*.name, 'bump') }}
         runs-on: ubuntu-latest
         steps:
-            - run: echo pull request was closed
+            - uses: ./.github/actions/tag
