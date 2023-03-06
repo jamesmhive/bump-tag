@@ -436,7 +436,6 @@ function getExitExcuse() {
         `Bump cancelled. User thought of something better to do.`,
         `Bump cancelled. User grew weary of these choices.`,
         `Bump cancelled. Or was it?`,
-        `The bump is dead. Long live the bump.`,
         `User cancelled the bump. They'll be back...`,
         `User cancelled the bump and ran away.`,
         `Bump cancelled. A fairy died.`,
