@@ -121,7 +121,7 @@ async function bump({
         await tryReset();
         return exitWithError(
             `Branch "${bumpBranchName}" already exists on remote "${remote}".
-            * Did you or someone else already bump "${packageInfo.nameNoScope}" to v${nextVersion}?
+            * Did someone else already bump "${packageInfo.nameNoScope}" to v${nextVersion}?
             * If a bump PR matching this version was closed, make sure the branch was deleted`
         );
     }
