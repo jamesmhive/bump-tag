@@ -152,7 +152,7 @@ async function bump({
     await run('git', ['add', '--all']);
     await run('git', ['commit', '-m', commitMessage]);
 
-    console.log(`Pushing "${bumpBranchName}" to ${remote}`);
+    console.log(`Pushing branch to ${remote}`);
     await run('git', ['push', '-u', remote, bumpBranchName]);
     await run('git', ['pull']);
 
